@@ -1,0 +1,14 @@
+syntax = "proto3";
+package provenance.vault.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/provenance-io/provenance/x/vault/types";
+option java_package = "io.provenance.vault.v1";
+option java_multiple_files = true;
+
+// Params defines the parameters for the vault module.
+message Params {
+
+}

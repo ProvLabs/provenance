@@ -1,0 +1,20 @@
+syntax = "proto3";
+package provenance.vault.v1;
+
+import "gogoproto/gogo.proto";
+import "provenance/vault/v1/params.proto";
+import "provenance/vault/v1/vault.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/provenance-io/provenance/x/vault/types";
+option java_package = "io.provenance.vault.v1";
+option java_multiple_files = true;
+
+// GenesisState defines the vault module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+
+  // vaults defines the vaults that exist at genesis.
+  repeated Vault vaults = 2 [(gogoproto.nullable) = false];
+}
