@@ -172,6 +172,9 @@ import (
 	triggerkeeper "github.com/provenance-io/provenance/x/trigger/keeper"
 	triggermodule "github.com/provenance-io/provenance/x/trigger/module"
 	triggertypes "github.com/provenance-io/provenance/x/trigger/types"
+	vaultkeeper "github.com/provenance-io/provenance/x/vault/keeper"
+	vaultmodule "github.com/provenance-io/provenance/x/vault/module"
+	vaulttypes "github.com/provenance-io/provenance/x/vault/types"
 )
 
 var (
@@ -271,6 +274,7 @@ type App struct {
 	NameKeeper      namekeeper.Keeper
 	HoldKeeper      holdkeeper.Keeper
 	ExchangeKeeper  exchangekeeper.Keeper
+	VaultKeeper     vaultkeeper.Keeper
 	WasmKeeper      *wasmkeeper.Keeper
 	ContractKeeper  *wasmkeeper.PermissionedKeeper
 
@@ -377,6 +381,7 @@ func New(
 		oracletypes.StoreKey,
 		hold.StoreKey,
 		exchange.StoreKey,
+		vaulttypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys()
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -584,6 +589,8 @@ func New(
 		app.MetadataKeeper,
 	)
 
+	app.VaultKeeper = vaultkeeper.NewKeeper(appCodec, keys[vaulttypes.StoreKey])
+
 	pioMessageRouter := MessageRouterFunc(func(msg sdk.Msg) baseapp.MsgServiceHandler {
 		return pioMsgFeesRouter.Handler(msg)
 	})
@@ -753,6 +760,7 @@ func New(
 		exchangemodule.NewAppModule(appCodec, app.ExchangeKeeper),
 		quarantinemodule.NewAppModule(appCodec, app.QuarantineKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		sanctionmodule.NewAppModule(appCodec, app.SanctionKeeper, app.AccountKeeper, app.BankKeeper, app.GovKeeper, app.interfaceRegistry),
+		vaultmodule.NewAppModule(appCodec, app.VaultKeeper),
 
 		// IBC
 		ibc.NewAppModule(app.IBCKeeper),
@@ -854,6 +862,7 @@ func New(
 		msgfeestypes.ModuleName,
 		hold.ModuleName,
 		exchange.ModuleName, // must be after the hold module.
+		vaulttypes.ModuleName,
 
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
@@ -891,6 +900,7 @@ func New(
 		sanction.ModuleName,
 		hold.ModuleName,
 		exchange.ModuleName,
+		vaulttypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		circuittypes.ModuleName,
 

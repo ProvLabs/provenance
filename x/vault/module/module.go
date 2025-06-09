@@ -1,151 +1,153 @@
 package module
 
-// import (
-// 	"context"
-// 	"encoding/json"
-// 	"fmt"
-// 	"math/rand"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"math/rand"
 
-// 	// "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-// 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-// 	"github.com/spf13/cobra"
+	// "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 
-// 	abci "github.com/cometbft/cometbft/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 
-// 	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/core/appmodule"
 
-// 	sdkclient "github.com/cosmos/cosmos-sdk/client"
-// 	"github.com/cosmos/cosmos-sdk/codec"
-// 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-// 	sdk "github.com/cosmos/cosmos-sdk/types"
-// 	"github.com/cosmos/cosmos-sdk/types/module"
-// 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	sdkclient "github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 
-// 	"github.com/provenance-io/provenance/x/vault/client/cli"
-// 	"github.com/provenance-io/provenance/x/vault/keeper"
-// 	"github.com/provenance-io/provenance/x/vault/simulation"
-// 	"github.com/provenance-io/provenance/x/vualt/types"
-// )
+	"github.com/provenance-io/provenance/x/vault/keeper"
 
-// var (
-// 	_ module.AppModuleBasic      = (*AppModule)(nil)
-// 	_ module.AppModuleSimulation = (*AppModule)(nil)
-// 	_ appmodule.AppModule        = (*AppModule)(nil)
-// )
+	// "github.com/provenance-io/provenance/x/vault/simulation"
+	"github.com/provenance-io/provenance/x/vault/client/cli"
+	"github.com/provenance-io/provenance/x/vault/types"
+)
 
-// // AppModuleBasic defines the basic application module used by the vault module.
-// type AppModuleBasic struct {
-// 	cdc codec.Codec
-// }
+var (
+	_ module.AppModuleBasic = (*AppModule)(nil)
+	// _ module.AppModuleSimulation = (*AppModule)(nil)
+	_ appmodule.AppModule = (*AppModule)(nil)
+)
 
-// // Name returns the vault module's name.
-// func (AppModuleBasic) Name() string {
-// 	return types.ModuleName
-// }
+// AppModuleBasic defines the basic application module used by the vault module.
+type AppModuleBasic struct {
+	cdc codec.Codec
+}
 
-// // DefaultGenesis returns default genesis state as raw bytes for the vault module.
-// func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-// 	return cdc.MustMarshalJSON(types.DefaultGenesisState())
-// }
+// Name returns the vault module's name.
+func (AppModuleBasic) Name() string {
+	return types.ModuleName
+}
 
-// // ValidateGenesis performs genesis state validation for the vault module.
-// func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ sdkclient.TxEncodingConfig, bz json.RawMessage) error {
-// 	var data types.GenesisState
-// 	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
-// 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
-// 	}
-// 	return data.Validate()
-// }
+// DefaultGenesis returns default genesis state as raw bytes for the vault module.
+func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	return cdc.MustMarshalJSON(types.DefaultGenesisState())
+}
 
-// // GetQueryCmd returns the CLI query commands for the vault module.
-// func (a AppModuleBasic) GetQueryCmd() *cobra.Command {
-// 	return cli.CmdQuery()
-// }
+// ValidateGenesis performs genesis state validation for the vault module.
+func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ sdkclient.TxEncodingConfig, bz json.RawMessage) error {
+	var data types.GenesisState
+	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
+	}
+	return data.Validate()
+}
 
-// // GetTxCmd returns the CLI transaction commands for the vault module.
-// func (a AppModuleBasic) GetTxCmd() *cobra.Command {
-// 	return cli.CmdTx()
-// }
+// GetQueryCmd returns the CLI query commands for the vault module.
+func (a AppModuleBasic) GetQueryCmd() *cobra.Command {
+	return cli.CmdQuery()
+}
 
-// // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the vault module.
-// func (a AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx sdkclient.Context, mux *runtime.ServeMux) {
-// 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
-// 		panic(err)
-// 	}
-// }
+// GetTxCmd returns the CLI transaction commands for the vault module.
+func (a AppModuleBasic) GetTxCmd() *cobra.Command {
+	return cli.TxCmd()
+}
 
-// // RegisterInterfaces registers the vault module's interface types.
-// func (AppModuleBasic) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
-// 	types.RegisterInterfaces(registry)
-// }
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the vault module.
+func (a AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx sdkclient.Context, mux *runtime.ServeMux) {
+	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+		panic(err)
+	}
+}
 
-// // RegisterLegacyAminoCodec registers the vault module's types for the given codec.
-// func (AppModuleBasic) RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}
+// RegisterInterfaces registers the vault module's interface types.
+func (AppModuleBasic) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
+	types.RegisterInterfaces(registry)
+}
 
-// // AppModule implements an application module for the vault module.
-// type AppModule struct {
-// 	AppModuleBasic
-// 	keeper keeper.Keeper
-// }
+// RegisterLegacyAminoCodec registers the vault module's types for the given codec.
+func (AppModuleBasic) RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}
 
-// // NewAppModule creates a new AppModule object.
-// func NewAppModule(cdc codec.Codec, vaultKeeper keeper.Keeper) AppModule {
-// 	return AppModule{
-// 		AppModuleBasic: AppModuleBasic{cdc: cdc},
-// 		keeper:         vaultKeeper,
-// 	}
-// }
+// AppModule implements an application module for the vault module.
+type AppModule struct {
+	AppModuleBasic
+	keeper keeper.Keeper
+}
 
-// // IsOnePerModuleType indicates that this is the only vault module of its type in the app.
-// func (AppModule) IsOnePerModuleType() {}
+// NewAppModule creates a new AppModule object.
+func NewAppModule(cdc codec.Codec, vaultKeeper keeper.Keeper) AppModule {
+	return AppModule{
+		AppModuleBasic: AppModuleBasic{cdc: cdc},
+		keeper:         vaultKeeper,
+	}
+}
 
-// // IsAppModule marks this as a Cosmos SDK AppModule.
-// func (AppModule) IsAppModule() {}
+// IsOnePerModuleType indicates that this is the only vault module of its type in the app.
+func (AppModule) IsOnePerModuleType() {}
 
-// // RegisterInvariants registers the vault module invariants.
-// func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
+// IsAppModule marks this as a Cosmos SDK AppModule.
+func (AppModule) IsAppModule() {}
 
-// // InitGenesis performs genesis initialization for the vault module.
-// func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-// 	// var genesisState vault.GenesisState
-// 	// cdc.MustUnmarshalJSON(data, &genesisState)
-// 	// am.keeper.InitGenesis(ctx, &genesisState)
-// 	return []abci.ValidatorUpdate{}
-// }
+// RegisterInvariants registers the vault module invariants.
+func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// // ExportGenesis returns the exported genesis state as raw bytes.
-// func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-// 	gs := am.keeper.ExportGenesis(ctx)
-// 	return cdc.MustMarshalJSON(gs)
-// }
+// InitGenesis performs genesis initialization for the vault module.
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
+	// var genesisState vault.GenesisState
+	// cdc.MustUnmarshalJSON(data, &genesisState)
+	// am.keeper.InitGenesis(ctx, &genesisState)
+	return []abci.ValidatorUpdate{}
+}
 
-// // RegisterServices registers module services for gRPC Msg and Query handling.
-// func (am AppModule) RegisterServices(cfg module.Configurator) {
-// 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.keeper))
-// 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServer(am.keeper))
-// }
+// ExportGenesis returns the exported genesis state as raw bytes.
+func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
+	gs := am.keeper.ExportGenesis(ctx)
+	return cdc.MustMarshalJSON(gs)
+}
 
-// // ConsensusVersion returns the consensus version of the vault module.
-// func (AppModule) ConsensusVersion() uint64 {
-// 	return 1
-// }
+// RegisterServices registers module services for gRPC Msg and Query handling.
+func (am AppModule) RegisterServices(cfg module.Configurator) {
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.keeper))
+	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServer(am.keeper))
+}
 
-// // GenerateGenesisState generates a randomized genesis state for simulation.
-// func (am AppModule) GenerateGenesisState(simState *module.SimulationState) {
-// 	simulation.RandomizedGenState(simState)
-// }
+// ConsensusVersion returns the consensus version of the vault module.
+func (AppModule) ConsensusVersion() uint64 {
+	return 1
+}
 
-// // RandomizedParams returns randomized parameter changes for simulation.
-// func (AppModule) RandomizedParams(_ *rand.Rand) []simtypes.LegacyParamChange {
-// 	return nil
-// }
+// GenerateGenesisState generates a randomized genesis state for simulation.
+func (am AppModule) GenerateGenesisState(simState *module.SimulationState) {
+	// simulation.RandomizedGenState(simState)
+}
 
-// // RegisterStoreDecoder registers the store decoder for simulation.
-// func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
-// 	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
-// }
+// RandomizedParams returns randomized parameter changes for simulation.
+func (AppModule) RandomizedParams(_ *rand.Rand) []simtypes.LegacyParamChange {
+	return nil
+}
 
-// // WeightedOperations returns the simulation operations for the vault module.
-// func (am AppModule) WeightedOperations(_ module.SimulationState) []simtypes.WeightedOperation {
-// 	return simulation.WeightedOperations()
-// }
+// RegisterStoreDecoder registers the store decoder for simulation.
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
+	// sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
+}
+
+// WeightedOperations returns the simulation operations for the vault module.
+func (am AppModule) WeightedOperations(_ module.SimulationState) []simtypes.WeightedOperation {
+	// return simulation.WeightedOperations()
+	return []simtypes.WeightedOperation{}
+}
