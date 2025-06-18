@@ -12,6 +12,9 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/gorilla/mux"
+	vaultmodule "github.com/provlabs/vault"
+	vaultkeeper "github.com/provlabs/vault/keeper"
+	vaulttypes "github.com/provlabs/vault/types"
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
@@ -172,9 +175,6 @@ import (
 	triggerkeeper "github.com/provenance-io/provenance/x/trigger/keeper"
 	triggermodule "github.com/provenance-io/provenance/x/trigger/module"
 	triggertypes "github.com/provenance-io/provenance/x/trigger/types"
-	vaultkeeper "github.com/provenance-io/provenance/x/vault/keeper"
-	vaultmodule "github.com/provenance-io/provenance/x/vault/module"
-	vaulttypes "github.com/provenance-io/provenance/x/vault/types"
 )
 
 var (
@@ -274,7 +274,7 @@ type App struct {
 	NameKeeper      namekeeper.Keeper
 	HoldKeeper      holdkeeper.Keeper
 	ExchangeKeeper  exchangekeeper.Keeper
-	VaultKeeper     vaultkeeper.Keeper
+	VaultKeeper     *vaultkeeper.Keeper
 	WasmKeeper      *wasmkeeper.Keeper
 	ContractKeeper  *wasmkeeper.PermissionedKeeper
 
@@ -589,7 +589,7 @@ func New(
 		app.MetadataKeeper,
 	)
 
-	app.VaultKeeper = vaultkeeper.NewKeeper(appCodec, keys[vaulttypes.StoreKey])
+	app.VaultKeeper = vaultkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[vaulttypes.StoreKey]), runtime.EventService{}, app.AccountKeeper.AddressCodec(), []byte(govAuthority))
 
 	pioMessageRouter := MessageRouterFunc(func(msg sdk.Msg) baseapp.MsgServiceHandler {
 		return pioMsgFeesRouter.Handler(msg)
@@ -760,7 +760,7 @@ func New(
 		exchangemodule.NewAppModule(appCodec, app.ExchangeKeeper),
 		quarantinemodule.NewAppModule(appCodec, app.QuarantineKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		sanctionmodule.NewAppModule(appCodec, app.SanctionKeeper, app.AccountKeeper, app.BankKeeper, app.GovKeeper, app.interfaceRegistry),
-		vaultmodule.NewAppModule(appCodec, app.VaultKeeper),
+		vaultmodule.NewAppModule(app.VaultKeeper, app.AccountKeeper.AddressCodec()),
 
 		// IBC
 		ibc.NewAppModule(app.IBCKeeper),
@@ -813,6 +813,7 @@ func New(
 		attributetypes.ModuleName,
 		authz.ModuleName,
 		triggertypes.ModuleName,
+		vaulttypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -822,6 +823,7 @@ func New(
 		feegrant.ModuleName,
 		group.ModuleName,
 		triggertypes.ModuleName,
+		vaulttypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
