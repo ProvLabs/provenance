@@ -65,7 +65,7 @@ jobs:
           chain: provenance
           local: true
           tag: ${{ steps.meta.outputs.version }}
-          registry: us-central1-docker.pkg.dev
+          registry: us-central1-docker.pkg.dev/provlabs-test/docker
           platform: linux/amd64
           dockerfile: cosmos
           build-target: |
