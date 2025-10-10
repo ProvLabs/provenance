@@ -18,10 +18,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
-	vaultmodule "github.com/provlabs/vault"
-	vaultkeeper "github.com/provlabs/vault/keeper"
-	vaulttypes "github.com/provlabs/vault/types"
-
 	abci "github.com/cometbft/cometbft/abci/types"
 	cmtos "github.com/cometbft/cometbft/libs/os"
 
