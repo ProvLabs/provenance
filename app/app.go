@@ -12,6 +12,9 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/gorilla/mux"
+	vaultmodule "github.com/provlabs/vault"
+	vaultkeeper "github.com/provlabs/vault/keeper"
+	vaulttypes "github.com/provlabs/vault/types"
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
@@ -777,7 +780,7 @@ func New(
 		quarantinemodule.NewAppModule(appCodec, app.QuarantineKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		sanctionmodule.NewAppModule(appCodec, app.SanctionKeeper, app.AccountKeeper, app.BankKeeper, app.GovKeeper, app.interfaceRegistry),
 
-		vaultmodule.NewAppModule(app.VaultKeeper, address.Bech32Codec{Bech32Prefix: addrPrefix}),
+		vaultmodule.NewAppModule(app.VaultKeeper, app.MarkerKeeper, app.BankKeeper, address.Bech32Codec{Bech32Prefix: addrPrefix}),
 
 		// IBC
 		ibc.NewAppModule(app.IBCKeeper),
