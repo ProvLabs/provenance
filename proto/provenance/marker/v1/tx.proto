@@ -118,8 +118,11 @@ message MsgAddMarkerRequest {
   bool                     allow_forced_transfer    = 10;
   repeated string          required_attributes      = 11;
   uint64                   usd_cents                = 12 [deprecated = true];
-  uint64                   volume                   = 13;
+  // Deprecated: Prefer to use `volume_int` instead. It cannot represent volumes larger than the max uint64.
+  uint64                   volume                   = 13 [deprecated = true];
   uint64                   usd_mills                = 14;
+  // volume_int is the 256-bit replacement for the deprecated volume field; it is the authoritative value when set.
+  string                   volume_int               = 15 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgAddMarkerResponse defines the Msg/AddMarker response type
@@ -288,8 +291,11 @@ message MsgAddFinalizeActivateMarkerRequest {
   bool                     allow_forced_transfer    = 9;
   repeated string          required_attributes      = 10;
   uint64                   usd_cents                = 11 [deprecated = true];
-  uint64                   volume                   = 12;
+  // Deprecated: Prefer to use `volume_int` instead. It cannot represent volumes larger than the max uint64.
+  uint64                   volume                   = 12 [deprecated = true];
   uint64                   usd_mills                = 13;
+  // volume_int is the 256-bit replacement for the deprecated volume field; it is the authoritative value when set.
+  string                   volume_int               = 14 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgAddFinalizeActivateMarkerResponse defines the Msg/AddFinalizeActivateMarker response type

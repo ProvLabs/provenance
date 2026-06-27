@@ -294,7 +294,7 @@ func (k Keeper) AddSetNetAssetValues(ctx sdk.Context, marker types.MarkerAccount
 			_, err := k.GetMarkerByDenom(ctx, nav.Price.Denom)
 			if err != nil {
 				if err2 := nav.Validate(); err2 == nil {
-					navEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), nav.Price, nav.Volume, source)
+					navEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), nav.Price, nav.EffectiveVolume(), source)
 					_ = ctx.EventManager().EmitTypedEvent(navEvent)
 				}
 				errs = append(errs, fmt.Errorf("net asset value denom does not exist: %w", err))
@@ -312,11 +312,12 @@ func (k Keeper) AddSetNetAssetValues(ctx sdk.Context, marker types.MarkerAccount
 // SetNetAssetValue adds/updates a net asset value to marker
 func (k Keeper) SetNetAssetValue(ctx sdk.Context, marker types.MarkerAccountI, netAssetValue types.NetAssetValue, source string) error {
 	netAssetValue.UpdatedBlockHeight = uint64(ctx.BlockHeight()) //nolint:gosec // G115: ctx.BlockHeight() is always non-negative.
+	netAssetValue.Normalize()
 	if err := netAssetValue.Validate(); err != nil {
 		return err
 	}
 
-	setNetAssetValueEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), netAssetValue.Price, netAssetValue.Volume, source)
+	setNetAssetValueEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), netAssetValue.Price, netAssetValue.EffectiveVolume(), source)
 	if err := ctx.EventManager().EmitTypedEvent(setNetAssetValueEvent); err != nil {
 		return err
 	}
@@ -335,11 +336,12 @@ func (k Keeper) SetNetAssetValue(ctx sdk.Context, marker types.MarkerAccountI, n
 // SetNetAssetValueWithBlockHeight adds/updates a net asset value to marker with a specific block height
 func (k Keeper) SetNetAssetValueWithBlockHeight(ctx sdk.Context, marker types.MarkerAccountI, netAssetValue types.NetAssetValue, source string, blockHeight uint64) error {
 	netAssetValue.UpdatedBlockHeight = blockHeight
+	netAssetValue.Normalize()
 	if err := netAssetValue.Validate(); err != nil {
 		return err
 	}
 
-	setNetAssetValueEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), netAssetValue.Price, netAssetValue.Volume, source)
+	setNetAssetValueEvent := types.NewEventSetNetAssetValue(marker.GetDenom(), netAssetValue.Price, netAssetValue.EffectiveVolume(), source)
 	if err := ctx.EventManager().EmitTypedEvent(setNetAssetValueEvent); err != nil {
 		return err
 	}

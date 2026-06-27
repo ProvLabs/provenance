@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/gogoproto/proto"
@@ -470,7 +472,7 @@ func (s *TestSuite) TestKeeper_FillBids() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("6plum"), Volume: 1}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("6plum"), Volume: 1, VolumeInt: sdkmath.NewInt(1)}},
 						source:         "x/exchange market 2",
 					},
 				},
@@ -509,7 +511,7 @@ func (s *TestSuite) TestKeeper_FillBids() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 6",
 					},
 				},
@@ -596,7 +598,6 @@ func (s *TestSuite) TestKeeper_FillBids() {
 			expEvents: []*exchange.EventOrderFilled{
 				{OrderId: 13, Assets: "184467440737095516150apple", Price: "60plum", MarketId: 6},
 			},
-			adlEvents:    sdk.Events{s.markerNavSetEvent("184467440737095516150apple", "60plum", 6)},
 			expHoldCalls: HoldCalls{ReleaseHold: []*ReleaseHoldArgs{{addr: s.addr2, funds: s.coins("60plum")}}},
 			expBankCalls: BankCalls{
 				BlockedAddr: []sdk.AccAddress{s.addr2, s.addr5},
@@ -605,9 +606,15 @@ func (s *TestSuite) TestKeeper_FillBids() {
 					{ctxHasQuarantineBypass: true, fromAddr: s.addr2, toAddr: s.addr5, amt: s.coins("60plum")},
 				},
 			},
-			expLog: []string{
-				"ERR could not record net-asset-value of \"184467440737095516150apple\" at a " +
-					"price of \"60plum\": asset volume greater than max uint64 module=x/exchange",
+			expMarkerCalls: MarkerCalls{
+				GetMarker: []sdk.AccAddress{appleMarker.GetAddress()},
+				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
+					{
+						marker:         appleMarker,
+						netAssetValues: []markertypes.NetAssetValue{markertypes.NewNetAssetValueFromInt(s.coin("60plum"), s.coin("184467440737095516150apple").Amount)},
+						source:         "x/exchange market 6",
+					},
+				},
 			},
 		},
 		{
@@ -643,7 +650,7 @@ func (s *TestSuite) TestKeeper_FillBids() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 6",
 					},
 				},
@@ -706,7 +713,7 @@ func (s *TestSuite) TestKeeper_FillBids() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 3",
 					},
 				},
@@ -785,14 +792,14 @@ func (s *TestSuite) TestKeeper_FillBids() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         acornMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50prune"), Volume: 5}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50prune"), Volume: 5, VolumeInt: sdkmath.NewInt(5)}},
 						source:         "x/exchange market 3",
 					},
 					{
 						marker: appleMarker,
 						netAssetValues: []markertypes.NetAssetValue{
-							{Price: s.coin("33prune"), Volume: 6},
-							{Price: s.coin("60plum"), Volume: 12},
+							{Price: s.coin("33prune"), Volume: 6, VolumeInt: sdkmath.NewInt(6)},
+							{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)},
 						},
 						source: "x/exchange market 3",
 					},
@@ -1333,7 +1340,7 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("6plum"), Volume: 1}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("6plum"), Volume: 1, VolumeInt: sdkmath.NewInt(1)}},
 						source:         "x/exchange market 2",
 					},
 				},
@@ -1372,7 +1379,7 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 6",
 					},
 				},
@@ -1467,9 +1474,11 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 					{ctxHasQuarantineBypass: true, fromAddr: s.addr5, toAddr: s.addr2, amt: s.coins("60plum")},
 				},
 			},
+			expMarkerCalls: MarkerCalls{
+				GetMarker: []sdk.AccAddress{appleMarker.GetAddress()},
+			},
 			expLog: []string{
-				"ERR could not record net-asset-value of \"184467440737095516150apple\" at a " +
-					"price of \"60plum\": asset volume greater than max uint64 module=x/exchange",
+				"INF no marker found for asset denom \"apple\" module=x/exchange",
 			},
 		},
 		{
@@ -1505,7 +1514,7 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 6",
 					},
 				},
@@ -1568,7 +1577,7 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("60plum"), Volume: 12, VolumeInt: sdkmath.NewInt(12)}},
 						source:         "x/exchange market 3",
 					},
 				},
@@ -1649,12 +1658,12 @@ func (s *TestSuite) TestKeeper_FillAsks() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         acornMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50prune"), Volume: 5}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50prune"), Volume: 5, VolumeInt: sdkmath.NewInt(5)}},
 						source:         "x/exchange market 3",
 					},
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("93prune"), Volume: 18}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("93prune"), Volume: 18, VolumeInt: sdkmath.NewInt(18)}},
 						source:         "x/exchange market 3",
 					},
 				},
@@ -2031,7 +2040,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1, VolumeInt: sdkmath.NewInt(1)}},
 						source:         "x/exchange market 1",
 					},
 				},
@@ -2074,7 +2083,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*MDAddSetNetAssetValuesArgs{
 					{
 						ScopeID: scopeID1,
-						NAVs:    []metadatatypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1}},
+						NAVs:    []metadatatypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1, VolumeInt: sdkmath.NewInt(1)}},
 						Source:  "x/exchange market 1",
 					},
 				},
@@ -2186,7 +2195,6 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 					{addr: s.addr4, funds: s.coins("5peach")},
 				},
 			},
-			adlEvents: sdk.Events{s.markerNavSetEvent("184467440737095516150apple", "5peach", 1)},
 			expBankCalls: BankCalls{
 				BlockedAddr: []sdk.AccAddress{s.addr4, s.addr3},
 				SendCoins: []*SendCoinsArgs{
@@ -2194,7 +2202,16 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 					{ctxHasQuarantineBypass: true, fromAddr: s.addr4, toAddr: s.addr3, amt: s.coins("5peach")},
 				},
 			},
-			expLog: []string{"ERR could not record net-asset-value of \"184467440737095516150apple\" at a price of \"5peach\": asset volume greater than max uint64 module=x/exchange"},
+			expMarkerCalls: MarkerCalls{
+				GetMarker: []sdk.AccAddress{appleMarker.GetAddress()},
+				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
+					{
+						marker:         appleMarker,
+						netAssetValues: []markertypes.NetAssetValue{markertypes.NewNetAssetValueFromInt(s.coin("5peach"), s.coin("184467440737095516150apple").Amount)},
+						source:         "x/exchange market 1",
+					},
+				},
+			},
 		},
 		{
 			name: "one ask one bid: both full, no fees, error setting nav",
@@ -2237,7 +2254,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("5peach"), Volume: 1, VolumeInt: sdkmath.NewInt(1)}},
 						source:         "x/exchange market 1",
 					},
 				},
@@ -2301,7 +2318,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50peach"), Volume: 10}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("50peach"), Volume: 10, VolumeInt: sdkmath.NewInt(10)}},
 						source:         "x/exchange market 1",
 					},
 				},
@@ -2364,7 +2381,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("40peach"), Volume: 7}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("40peach"), Volume: 7, VolumeInt: sdkmath.NewInt(7)}},
 						source:         "x/exchange market 1",
 					},
 				},
@@ -2427,7 +2444,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("35peach"), Volume: 7}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("35peach"), Volume: 7, VolumeInt: sdkmath.NewInt(7)}},
 						source:         "x/exchange market 1",
 					},
 				},
@@ -2512,7 +2529,7 @@ func (s *TestSuite) TestKeeper_SettleOrders() {
 				AddSetNetAssetValues: []*AddSetNetAssetValuesArgs{
 					{
 						marker:         appleMarker,
-						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("150peach"), Volume: 100}},
+						netAssetValues: []markertypes.NetAssetValue{{Price: s.coin("150peach"), Volume: 100, VolumeInt: sdkmath.NewInt(100)}},
 						source:         "x/exchange market 2",
 					},
 				},

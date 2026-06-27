@@ -6,6 +6,8 @@ import (
 	"slices"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/provenance-io/provenance/internal/provutils"
@@ -577,6 +579,47 @@ func NewNetAssetValue(price sdk.Coin, volume uint64) NetAssetValue {
 	return NetAssetValue{
 		Price:  price,
 		Volume: volume,
+	}
+}
+
+// NewNetAssetValueFromInt returns a new NetAssetValue with a 256-bit volume. The
+// deprecated uint64 volume is populated when the value fits, for clients that
+// have not adopted volume_int.
+func NewNetAssetValueFromInt(price sdk.Coin, volume sdkmath.Int) NetAssetValue {
+	nav := NetAssetValue{
+		Price:     price,
+		VolumeInt: volume,
+	}
+	if !volume.IsNil() && volume.IsUint64() {
+		nav.Volume = volume.Uint64()
+	}
+	return nav
+}
+
+// EffectiveVolume returns the scope net asset value's volume as a math.Int. It
+// prefers the 256-bit volume_int field and falls back to the deprecated uint64
+// volume for entries written before volume_int existed.
+func (mnav NetAssetValue) EffectiveVolume() sdkmath.Int {
+	if !mnav.VolumeInt.IsNil() && !mnav.VolumeInt.IsZero() {
+		return mnav.VolumeInt
+	}
+	return sdkmath.NewIntFromUint64(mnav.Volume)
+}
+
+// Normalize reconciles the deprecated uint64 volume and volume_int fields and
+// applies the long-standing default that an absent or zero volume means one.
+// volume_int becomes the authoritative value, and the deprecated uint64 volume
+// is populated when the value fits or set to 0 when it overflows uint64.
+func (mnav *NetAssetValue) Normalize() {
+	v := mnav.EffectiveVolume()
+	if !v.IsPositive() {
+		v = sdkmath.OneInt()
+	}
+	mnav.VolumeInt = v
+	if v.IsUint64() {
+		mnav.Volume = v.Uint64()
+	} else {
+		mnav.Volume = 0
 	}
 }
 

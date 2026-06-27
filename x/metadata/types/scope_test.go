@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/hex"
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -2072,4 +2073,80 @@ func TestNetAssetValueValidate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewNetAssetValueFromInt(t *testing.T) {
+	price := sdk.NewInt64Coin("jackthecat", 406)
+	overflow := sdkmath.NewIntFromUint64(math.MaxUint64).Add(sdkmath.OneInt())
+
+	t.Run("value fits in uint64", func(t *testing.T) {
+		nav := NewNetAssetValueFromInt(price, sdkmath.NewInt(100))
+		assert.Equal(t, price, nav.Price, "Price")
+		assert.Equal(t, "100", nav.VolumeInt.String(), "VolumeInt")
+		assert.Equal(t, uint64(100), nav.Volume, "deprecated Volume populated when value fits")
+	})
+
+	t.Run("value overflows uint64", func(t *testing.T) {
+		nav := NewNetAssetValueFromInt(price, overflow)
+		assert.Equal(t, overflow.String(), nav.VolumeInt.String(), "VolumeInt")
+		assert.Equal(t, uint64(0), nav.Volume, "deprecated Volume left 0 when value overflows uint64")
+	})
+}
+
+func TestNetAssetValueEffectiveVolume(t *testing.T) {
+	price := sdk.NewInt64Coin("jackthecat", 406)
+	overflow := sdkmath.NewIntFromUint64(math.MaxUint64).Add(sdkmath.OneInt())
+
+	tests := []struct {
+		name string
+		nav  NetAssetValue
+		exp  string
+	}{
+		{
+			name: "nil volume_int falls back to deprecated volume",
+			nav:  NetAssetValue{Price: price, Volume: 100},
+			exp:  "100",
+		},
+		{
+			name: "zero volume_int falls back to deprecated volume",
+			nav:  NetAssetValue{Price: price, Volume: 100, VolumeInt: sdkmath.ZeroInt()},
+			exp:  "100",
+		},
+		{
+			name: "volume_int preferred when set",
+			nav:  NetAssetValue{Price: price, Volume: 0, VolumeInt: overflow},
+			exp:  overflow.String(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.exp, tt.nav.EffectiveVolume().String(), "EffectiveVolume")
+		})
+	}
+}
+
+func TestNetAssetValueNormalize(t *testing.T) {
+	price := sdk.NewInt64Coin("jackthecat", 406)
+	overflow := sdkmath.NewIntFromUint64(math.MaxUint64).Add(sdkmath.OneInt())
+
+	t.Run("deprecated-only entry gets volume_int filled in", func(t *testing.T) {
+		nav := NetAssetValue{Price: price, Volume: 100}
+		nav.Normalize()
+		assert.Equal(t, "100", nav.VolumeInt.String(), "VolumeInt set from deprecated volume")
+		assert.Equal(t, uint64(100), nav.Volume, "deprecated Volume retained")
+	})
+
+	t.Run("zero volume defaults to one", func(t *testing.T) {
+		nav := NetAssetValue{Price: price}
+		nav.Normalize()
+		assert.Equal(t, "1", nav.VolumeInt.String(), "VolumeInt defaults to 1 when volume is zero")
+		assert.Equal(t, uint64(1), nav.Volume, "deprecated Volume defaults to 1 when volume is zero")
+	})
+
+	t.Run("overflow value zeroes deprecated volume", func(t *testing.T) {
+		nav := NetAssetValue{Price: price, VolumeInt: overflow}
+		nav.Normalize()
+		assert.Equal(t, overflow.String(), nav.VolumeInt.String(), "VolumeInt retained")
+		assert.Equal(t, uint64(0), nav.Volume, "deprecated Volume zeroed when value overflows uint64")
+	})
 }

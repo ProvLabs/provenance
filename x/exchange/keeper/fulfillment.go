@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -339,44 +338,17 @@ func (k Keeper) recordNAVs(ctx sdk.Context, marketID uint32, navs []exchange.Net
 	for _, nav := range navs {
 		isMetadataDenom := strings.HasPrefix(nav.Assets.Denom, metadatatypes.DenomPrefix)
 
-		if !nav.Assets.Amount.IsUint64() {
-			k.logErrorf(ctx, "could not record net-asset-value of %q at a price of %q: asset volume greater than max uint64",
-				nav.Assets, nav.Price)
-			if isMetadataDenom {
-				k.emitEvent(ctx, &metadatatypes.EventSetNetAssetValue{
-					ScopeId: strings.TrimPrefix(nav.Assets.Denom, metadatatypes.DenomPrefix),
-					Price:   nav.Price.String(),
-					Volume:  nav.Assets.Amount.String(),
-					Source:  source,
-				})
-			} else {
-				k.emitEvent(ctx, &markertypes.EventSetNetAssetValue{
-					Denom:  nav.Assets.Denom,
-					Price:  nav.Price.String(),
-					Volume: nav.Assets.Amount.String(),
-					Source: source,
-				})
-			}
-			continue
-		}
-
 		if isMetadataDenom {
 			if _, known := metadataNAVs[nav.Assets.Denom]; !known {
 				metadataDenoms = append(metadataDenoms, nav.Assets.Denom)
 			}
-			metadataNAV := metadatatypes.NetAssetValue{
-				Price:  nav.Price,
-				Volume: nav.Assets.Amount.Uint64(),
-			}
+			metadataNAV := metadatatypes.NewNetAssetValueFromInt(nav.Price, nav.Assets.Amount)
 			metadataNAVs[nav.Assets.Denom] = append(metadataNAVs[nav.Assets.Denom], metadataNAV)
 		} else {
 			if _, known := markerNAVs[nav.Assets.Denom]; !known {
 				markerDenoms = append(markerDenoms, nav.Assets.Denom)
 			}
-			markerNAV := markertypes.NetAssetValue{
-				Price:  nav.Price,
-				Volume: nav.Assets.Amount.Uint64(),
-			}
+			markerNAV := markertypes.NewNetAssetValueFromInt(nav.Price, nav.Assets.Amount)
 			markerNAVs[nav.Assets.Denom] = append(markerNAVs[nav.Assets.Denom], markerNAV)
 		}
 	}
@@ -427,7 +399,7 @@ func (k Keeper) recordNAVs(ctx sdk.Context, marketID uint32, navs []exchange.Net
 func (k Keeper) emitMarkerNAVEvents(ctx sdk.Context, denom string, navs []markertypes.NetAssetValue, source string) {
 	events := make([]proto.Message, len(navs))
 	for i, nav := range navs {
-		events[i] = markertypes.NewEventSetNetAssetValue(denom, nav.Price, nav.Volume, source)
+		events[i] = markertypes.NewEventSetNetAssetValue(denom, nav.Price, nav.EffectiveVolume(), source)
 	}
 	k.emitEvents(ctx, events)
 }
@@ -437,7 +409,7 @@ func (k Keeper) emitMarkerNAVEvents(ctx sdk.Context, denom string, navs []marker
 func (k Keeper) emitMetadataNAVEvents(ctx sdk.Context, scopeID metadatatypes.MetadataAddress, navs []metadatatypes.NetAssetValue, source string) {
 	events := make([]proto.Message, len(navs))
 	for i, nav := range navs {
-		events[i] = metadatatypes.NewEventSetNetAssetValue(scopeID, nav.Price, nav.Volume, source)
+		events[i] = metadatatypes.NewEventSetNetAssetValue(scopeID, nav.Price, nav.EffectiveVolume(), source)
 	}
 	k.emitEvents(ctx, events)
 }
@@ -451,7 +423,7 @@ func (k Keeper) GetNav(ctx sdk.Context, assetsDenom, priceDenom string) *exchang
 			return nil
 		}
 		return &exchange.NetAssetPrice{
-			Assets: sdk.Coin{Denom: assetsDenom, Amount: sdkmath.NewIntFromUint64(nav.Volume)},
+			Assets: sdk.Coin{Denom: assetsDenom, Amount: nav.EffectiveVolume()},
 			Price:  nav.Price,
 		}
 	}
@@ -462,7 +434,7 @@ func (k Keeper) GetNav(ctx sdk.Context, assetsDenom, priceDenom string) *exchang
 		return nil
 	}
 	return &exchange.NetAssetPrice{
-		Assets: sdk.Coin{Denom: assetsDenom, Amount: sdkmath.NewIntFromUint64(nav.Volume)},
+		Assets: sdk.Coin{Denom: assetsDenom, Amount: nav.EffectiveVolume()},
 		Price:  nav.Price,
 	}
 }

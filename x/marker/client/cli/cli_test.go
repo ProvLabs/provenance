@@ -603,7 +603,7 @@ func (s *IntegrationTestSuite) TestMarkerQueryCommands() {
 			name:           "marker net asset value query",
 			cmd:            markercli.NetAssetValuesCmd(),
 			args:           []string{"testcoin"},
-			expectedOutput: "net_asset_values:\n- price:\n    amount: \"100\"\n    denom: usd\n  updated_block_height: \"0\"\n  volume: \"100\"",
+			expectedOutput: "net_asset_values:\n- price:\n    amount: \"100\"\n    denom: usd\n  updated_block_height: \"0\"\n  volume: \"100\"\n  volume_int: \"100\"",
 		},
 	}
 	for _, tc := range testCases {
@@ -1951,6 +1951,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -1963,6 +1964,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -1975,6 +1977,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -1987,6 +1990,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2005,6 +2009,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2017,6 +2022,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2029,6 +2035,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2041,6 +2048,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    true,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2053,6 +2061,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    true,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 			expErr: nil,
 		},
@@ -2066,6 +2075,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 			expErr: nil,
 		},
@@ -2079,6 +2089,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: true,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2091,6 +2102,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: true,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2103,6 +2115,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2115,6 +2128,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowGovControl:    false,
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{"jack.the.cat.io", "george.the.dog.io"},
+				Volume:             sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -2134,7 +2148,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
 				UsdMills:           0,
-				Volume:             11,
+				Volume:             sdkmath.NewInt(11),
 			},
 		},
 		{
@@ -2148,7 +2162,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowForceTransfer: false,
 				RequiredAttributes: []string{},
 				UsdMills:           1,
-				Volume:             11,
+				Volume:             sdkmath.NewInt(11),
 			},
 		},
 		{
@@ -2162,7 +2176,7 @@ func TestParseNewMarkerFlags(t *testing.T) {
 				AllowForceTransfer: true,
 				RequiredAttributes: []string{"jack.the.cat.io", "george.the.dog.io"},
 				UsdMills:           10,
-				Volume:             12,
+				Volume:             sdkmath.NewInt(12),
 			},
 		},
 		// Note: I can't figure out a way to make cmd.Flags().GetBool return an error.

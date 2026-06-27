@@ -1,7 +1,7 @@
 package types
 
 import (
-	"strconv"
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -187,11 +187,11 @@ func NewEventOSLocatorDeleted(owner string) *EventOSLocatorDeleted {
 }
 
 // NewEventSetNetAssetValue returns a new instance of EventSetNetAssetValue
-func NewEventSetNetAssetValue(scopeID MetadataAddress, price sdk.Coin, volume uint64, source string) *EventSetNetAssetValue {
+func NewEventSetNetAssetValue(scopeID MetadataAddress, price sdk.Coin, volume sdkmath.Int, source string) *EventSetNetAssetValue {
 	return &EventSetNetAssetValue{
 		ScopeId: scopeID.String(),
 		Price:   price.String(),
 		Source:  source,
-		Volume:  strconv.FormatUint(volume, 10),
+		Volume:  volume.String(),
 	}
 }

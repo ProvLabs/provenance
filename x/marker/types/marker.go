@@ -506,11 +506,53 @@ func RemoveFromRequiredAttributes(currentAttrs []string, removeAttrs []string) (
 	return reqAttrs, nil
 }
 
-// NewNetAssetValue returns a new instance of NetAssetValue
+// NewNetAssetValue returns a new instance of NetAssetValue.
+//
+// volume is the deprecated uint64 form; volume_int is populated from it when the
+// value is stored. Use NewNetAssetValueFromInt to supply a 256-bit volume.
 func NewNetAssetValue(price sdk.Coin, volume uint64) NetAssetValue {
 	return NetAssetValue{
 		Price:  price,
 		Volume: volume,
+	}
+}
+
+// NewNetAssetValueFromInt returns a new NetAssetValue with a 256-bit volume. The
+// deprecated uint64 volume is populated when the value fits, for clients that
+// have not adopted volume_int.
+func NewNetAssetValueFromInt(price sdk.Coin, volume sdkmath.Int) NetAssetValue {
+	nav := NetAssetValue{
+		Price:     price,
+		VolumeInt: volume,
+	}
+	if !volume.IsNil() && volume.IsUint64() {
+		nav.Volume = volume.Uint64()
+	}
+	return nav
+}
+
+// EffectiveVolume returns the net asset value's volume as a math.Int. It prefers the
+// 256-bit volume_int field and falls back to the deprecated uint64 volume for
+// entries written before volume_int existed (volume is always positive, so a
+// nil or zero volume_int unambiguously means "use the deprecated field").
+func (mnav NetAssetValue) EffectiveVolume() sdkmath.Int {
+	if !mnav.VolumeInt.IsNil() && !mnav.VolumeInt.IsZero() {
+		return mnav.VolumeInt
+	}
+	return sdkmath.NewIntFromUint64(mnav.Volume)
+}
+
+// Normalize makes the deprecated uint64 volume and the volume_int field
+// consistent so both are stored: volume_int becomes the authoritative value, and
+// the deprecated uint64 volume is populated when the value fits or set to 0 when
+// it overflows uint64.
+func (mnav *NetAssetValue) Normalize() {
+	v := mnav.EffectiveVolume()
+	mnav.VolumeInt = v
+	if v.IsUint64() {
+		mnav.Volume = v.Uint64()
+	} else {
+		mnav.Volume = 0
 	}
 }
 
@@ -520,7 +562,7 @@ func (mnav *NetAssetValue) Validate() error {
 		return err
 	}
 
-	if mnav.Price.Amount.GT(sdkmath.NewInt(0)) && mnav.Volume < 1 {
+	if mnav.Price.Amount.GT(sdkmath.NewInt(0)) && !mnav.EffectiveVolume().IsPositive() {
 		return fmt.Errorf("marker net asset value volume must be positive value")
 	}
 

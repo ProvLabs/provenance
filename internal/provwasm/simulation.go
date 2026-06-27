@@ -179,7 +179,7 @@ func SimulateMsgAddMarker(simState module.SimulationState, ak authkeeper.Account
 			false,      // don't allow forced transfer
 			[]string{}, // required attributes
 			0,
-			0,
+			sdkmath.ZeroInt(),
 		)
 
 		bk.SetSendEnabled(ctx, denom, true)

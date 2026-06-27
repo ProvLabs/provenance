@@ -53,6 +53,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) {
 	for _, mNavs := range data.NetAssetValues {
 		for _, nav := range mNavs.NetAssetValues {
 			navCopy := nav
+			navCopy.Normalize()
 			bz, err := k.cdc.Marshal(&navCopy)
 			if err != nil {
 				panic(err)

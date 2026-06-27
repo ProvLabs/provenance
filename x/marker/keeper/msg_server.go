@@ -121,7 +121,7 @@ func (k msgServer) AddMarker(goCtx context.Context, msg *types.MsgAddMarkerReque
 	// This check prevents a proliferation of incorrect NAV entries being recorded when setting up markers.
 	if msg.UsdMills > 0 {
 		usdMills := sdkmath.NewIntFromUint64(msg.UsdMills)
-		nav := types.NewNetAssetValue(sdk.NewCoin(types.UsdDenom, usdMills), msg.Volume)
+		nav := types.NewNetAssetValueFromInt(sdk.NewCoin(types.UsdDenom, usdMills), msg.EffectiveVolume())
 		err = k.AddSetNetAssetValues(ctx, ma, []types.NetAssetValue{nav}, types.ModuleName)
 		if err != nil {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
@@ -549,7 +549,7 @@ func (k msgServer) AddFinalizeActivateMarker(goCtx context.Context, msg *types.M
 	// This check prevents a proliferation of incorrect NAV entries being recorded when setting up markers.
 	if msg.UsdMills > 0 {
 		usdMills := sdkmath.NewIntFromUint64(msg.UsdMills)
-		err = k.AddSetNetAssetValues(ctx, ma, []types.NetAssetValue{types.NewNetAssetValue(sdk.NewCoin(types.UsdDenom, usdMills), msg.Volume)}, types.ModuleName)
+		err = k.AddSetNetAssetValues(ctx, ma, []types.NetAssetValue{types.NewNetAssetValueFromInt(sdk.NewCoin(types.UsdDenom, usdMills), msg.EffectiveVolume())}, types.ModuleName)
 		if err != nil {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
 		}

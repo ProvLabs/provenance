@@ -132,14 +132,14 @@ func TestExistingAccounts(t *testing.T) {
 	require.Equal(t, existingBalance, app.BankKeeper.GetBalance(ctx, addr, "coin"), "account balance must be set")
 
 	// Creating a marker over an account with zero sequence is fine.
-	_, err := server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err := server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	require.NoError(t, err, "should allow a marker over existing account that has not signed anything.")
 
 	// existing coin balance must still be present
 	require.Equal(t, existingBalance, app.BankKeeper.GetBalance(ctx, addr, "coin"), "account balances must be preserved")
 
 	// Creating a marker over an existing marker fails.
-	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	require.Error(t, err, "fails because marker already exists")
 
 	// replace existing test account with a new copy that has a positive sequence number
@@ -148,7 +148,7 @@ func TestExistingAccounts(t *testing.T) {
 	app.AccountKeeper.SetAccount(ctx, newAcc)
 
 	// Creating a marker over an existing account with a positive sequence number fails.
-	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("testcoin", sdkmath.NewInt(30), user, manager, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	require.Error(t, err, "should not allow creation over and existing account with a positive sequence number.")
 }
 
@@ -161,16 +161,16 @@ func TestUnrestrictedDenoms(t *testing.T) {
 
 	// Require a long unrestricted denom
 	app.MarkerKeeper.SetParams(ctx, types.Params{UnrestrictedDenomRegex: "[a-z]{12,20}"})
-	_, err := server.AddMarker(ctx, types.NewMsgAddMarkerRequest("tooshort", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err := server.AddMarker(ctx, types.NewMsgAddMarkerRequest("tooshort", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	require.Error(t, err, "fails with unrestricted denom length fault")
 	require.Equal(t, fmt.Errorf("invalid denom [tooshort] (fails unrestricted marker denom validation [a-z]{12,20})"), err, "should fail with denom restriction")
 
-	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("itslongenough", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("itslongenough", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	require.NoError(t, err, "should allow a marker with a sufficiently long denom")
 
 	// Set to an empty string (returns to default expression)
 	app.MarkerKeeper.SetParams(ctx, types.Params{UnrestrictedDenomRegex: ""})
-	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("short", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, 0))
+	_, err = server.AddMarker(ctx, types.NewMsgAddMarkerRequest("short", sdkmath.NewInt(30), user, user, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt()))
 	// succeeds now as the default unrestricted denom expression allows any valid denom (minimum length is 2)
 	require.NoError(t, err, "should allow any valid denom with a min length of two")
 }
@@ -1733,7 +1733,7 @@ func TestAddFinalizeActivateMarker(t *testing.T) {
 		[]string{},
 		[]types.AccessGrant{*types.NewAccessGrant(manager, []types.Access{types.Access_Mint, types.Access_Admin})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.NoError(t, err, "should allow a marker over existing account that has not signed anything.")
 
@@ -1763,7 +1763,7 @@ func TestAddFinalizeActivateMarker(t *testing.T) {
 		[]string{},
 		[]types.AccessGrant{*types.NewAccessGrant(manager, []types.Access{types.Access_Mint, types.Access_Admin})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.Error(t, err, "fails because marker already exists")
 
@@ -1801,7 +1801,7 @@ func TestInvalidAccount(t *testing.T) {
 		[]string{},
 		[]types.AccessGrant{*types.NewAccessGrant(manager, []types.Access{types.Access_Mint, types.Access_Admin})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.Error(t, err, "should not allow creation over and existing account with a positive sequence number.")
 	require.Contains(t, err.Error(), "account at "+user.String()+" is not a marker account: invalid request")
@@ -1830,7 +1830,7 @@ func TestAddFinalizeActivateMarkerUnrestrictedDenoms(t *testing.T) {
 			[]string{},
 			[]types.AccessGrant{*types.NewAccessGrant(user, []types.Access{types.Access_Mint, types.Access_Admin})},
 			0,
-			0,
+			sdkmath.ZeroInt(),
 		))
 	require.Error(t, err, "fails with unrestricted denom length fault")
 	require.Equal(t, fmt.Errorf("invalid denom [tooshort] (fails unrestricted marker denom validation [a-z]{12,20})"), err, "should fail with denom restriction")
@@ -1847,7 +1847,7 @@ func TestAddFinalizeActivateMarkerUnrestrictedDenoms(t *testing.T) {
 		[]string{},
 		[]types.AccessGrant{*types.NewAccessGrant(user, []types.Access{types.Access_Mint, types.Access_Admin})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.NoError(t, err, "should allow a marker with a sufficiently long denom")
 
@@ -1865,7 +1865,7 @@ func TestAddFinalizeActivateMarkerUnrestrictedDenoms(t *testing.T) {
 		[]string{},
 		[]types.AccessGrant{*types.NewAccessGrant(user, []types.Access{types.Access_Mint, types.Access_Admin})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	// succeeds now as the default unrestricted denom expression allows any valid denom (minimum length is 2)
 	require.NoError(t, err, "should allow any valid denom with a min length of two")
@@ -2500,7 +2500,7 @@ func TestAddSetNetAssetValues(t *testing.T) {
 		return rv
 	}
 	navEvent := func(denom string, price string, volume uint64, source string) sdk.Event {
-		tev := types.NewEventSetNetAssetValue(denom, coin(price), volume, source)
+		tev := types.NewEventSetNetAssetValue(denom, coin(price), sdkmath.NewIntFromUint64(volume), source)
 		rv, err := sdk.TypedEventToEvent(tev)
 		require.NoError(t, err, "TypedEventToEvent %q, %s, %d %q", denom, price, volume, source)
 		return rv
@@ -2795,6 +2795,47 @@ func TestGetNetAssetValue(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestSetNetAssetValueLargeVolume proves a volume larger than MaxUint64 survives a
+// round trip through SetNetAssetValue/GetNetAssetValue via the volume_int field.
+func TestSetNetAssetValueLargeVolume(t *testing.T) {
+	app := simapp.Setup(t)
+	ctx := app.NewContext(false)
+
+	admin := sdk.AccAddress("admin_account_______")
+	markerAddr := types.MustGetMarkerAddress("plum")
+	markerAcc := types.NewMarkerAccount(
+		authtypes.NewBaseAccount(markerAddr, nil, 0, 0),
+		sdk.NewInt64Coin("plum", 1_000_000_000),
+		admin,
+		[]types.AccessGrant{{
+			Address: admin.String(),
+			Permissions: []types.Access{
+				types.Access_Transfer, types.Access_Mint, types.Access_Burn, types.Access_Deposit,
+				types.Access_Withdraw, types.Access_Delete, types.Access_Admin,
+			},
+		}},
+		types.StatusProposed,
+		types.MarkerType_RestrictedCoin,
+		true, true, true,
+		[]string{},
+	)
+	require.NoError(t, app.MarkerKeeper.AddFinalizeAndActivateMarker(ctx, markerAcc), "AddFinalizeAndActivateMarker plum")
+
+	// A volume one larger than the maximum uint64, which the deprecated volume field cannot hold.
+	bigVolume := sdkmath.NewIntFromUint64(^uint64(0)).Add(sdkmath.OneInt())
+	nav := types.NewNetAssetValueFromInt(sdk.NewInt64Coin(types.UsdDenom, 50), bigVolume)
+	require.Equal(t, uint64(0), nav.Volume, "deprecated Volume should be 0 for an over-max volume")
+
+	require.NoError(t, app.MarkerKeeper.SetNetAssetValue(ctx, markerAcc, nav, "test"), "SetNetAssetValue large volume")
+
+	got, err := app.MarkerKeeper.GetNetAssetValue(ctx, "plum", types.UsdDenom)
+	require.NoError(t, err, "GetNetAssetValue plum usd")
+	require.NotNil(t, got, "GetNetAssetValue plum usd nav")
+	assert.Equal(t, bigVolume.String(), got.VolumeInt.String(), "stored volume_int")
+	assert.Equal(t, uint64(0), got.Volume, "stored deprecated volume")
+	assert.Equal(t, bigVolume.String(), got.EffectiveVolume().String(), "EffectiveVolume")
 }
 
 func TestIterateAllNetAssetValues(t *testing.T) {
@@ -3152,7 +3193,7 @@ func TestAccountControlsAllSupplyUsesLiveBankSupply(t *testing.T) {
 			types.Access_Withdraw,
 		})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.NoError(t, err, "create testcoin1 marker")
 
@@ -3258,7 +3299,7 @@ func TestAccountControlsAllSupplyNonFixedFullHolderGetsAccess(t *testing.T) {
 			types.Access_Withdraw,
 		})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.NoError(t, err, "create testcoin2 marker")
 
@@ -3309,7 +3350,7 @@ func TestAccountControlsAllSupplyFixedMarkerBehaviorUnchanged(t *testing.T) {
 			types.Access_Withdraw,
 		})},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	))
 	require.NoError(t, err, "create testcoin3 marker")
 

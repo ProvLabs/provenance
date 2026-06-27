@@ -721,7 +721,7 @@ func (s *MsgServerTestSuite) TestMsgAddAccessRequest() {
 		Permissions: types.AccessListByNames("Invalid"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest("hotdog", sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest("hotdog", sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add hotdog marker")
 
@@ -735,7 +735,7 @@ func (s *MsgServerTestSuite) TestMsgAddAccessRequest() {
 			Address:     s.owner1,
 			Permissions: types.AccessListByNames("MINT,BURN,DEPOSIT,WITHDRAW,DELETE,ADMIN"),
 		}},
-		0, 0)
+		0, sdkmath.ZeroInt())
 	_, err = s.msgServer.AddFinalizeActivateMarker(s.ctx, addMarkerMsg2)
 	s.Assert().NoError(err, "should successfully add/finalize/activate papaya marker")
 
@@ -797,7 +797,7 @@ func (s *MsgServerTestSuite) TestMsgDeleteAccessMarkerRequest() {
 		Permissions: types.AccessListByNames("MINT"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -833,7 +833,7 @@ func (s *MsgServerTestSuite) TestMsgDeleteAccessMarkerRequest() {
 func (s *MsgServerTestSuite) TestMsgActivateMarkerRequest() {
 	hotdogDenom := "hotdog"
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -873,7 +873,7 @@ func (s *MsgServerTestSuite) TestMsgCancelMarkerRequest() {
 		Permissions: types.AccessListByNames("DELETE"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -913,7 +913,7 @@ func (s *MsgServerTestSuite) TestMsgDeleteMarkerRequest() {
 		Permissions: types.AccessListByNames("DELETE,MINT"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -956,7 +956,7 @@ func (s *MsgServerTestSuite) TestMsgMintMarkerRequest() {
 		Address:     s.owner1,
 		Permissions: types.AccessListByNames("MINT,BURN,WITHDRAW"),
 	}
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -1005,7 +1005,7 @@ func (s *MsgServerTestSuite) TestMsgBurnMarkerRequest() {
 		Permissions: types.AccessListByNames("DELETE,MINT,BURN"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -1045,7 +1045,7 @@ func (s *MsgServerTestSuite) TestMsgWithdrawMarkerRequest() {
 		Permissions: types.AccessListByNames("DELETE,MINT,WITHDRAW"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(500), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(500), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -1125,7 +1125,7 @@ func (s *MsgServerTestSuite) TestMsgTransferMarkerRequest() {
 		Permissions: types.AccessListByNames("DELETE,MINT,WITHDRAW,TRANSFER"),
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(hotdogDenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -1193,7 +1193,7 @@ func (s *MsgServerTestSuite) TestMsgSetDenomMetadataRequest() {
 		Symbol:  hotdogSymbol,
 	}
 
-	addMarkerMsg := types.NewMsgAddMarkerRequest(fmt.Sprintf("n%s", hotdogDenom), sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, 0)
+	addMarkerMsg := types.NewMsgAddMarkerRequest(fmt.Sprintf("n%s", hotdogDenom), sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 	_, err := s.msgServer.AddMarker(s.ctx, addMarkerMsg)
 	s.Assert().NoError(err, "should successfully add marker")
 
@@ -1244,7 +1244,7 @@ func (s *MsgServerTestSuite) TestMsgAddFinalizeActivateMarkerRequest() {
 		{
 			name: "should successfully ADD,FINALIZE,ACTIVATE new marker",
 			handler: func(ctx sdk.Context) error {
-				msg := types.NewMsgAddFinalizeActivateMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, []types.AccessGrant{*types.NewAccessGrant(s.owner1Addr, []types.Access{types.Access_Mint, types.Access_Admin})}, 0, 0)
+				msg := types.NewMsgAddFinalizeActivateMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, []types.AccessGrant{*types.NewAccessGrant(s.owner1Addr, []types.Access{types.Access_Mint, types.Access_Admin})}, 0, sdkmath.ZeroInt())
 				_, err := s.msgServer.AddFinalizeActivateMarker(s.ctx, msg)
 				return err
 			},
@@ -1253,7 +1253,7 @@ func (s *MsgServerTestSuite) TestMsgAddFinalizeActivateMarkerRequest() {
 		{
 			name: "should successfully ADD,FINALIZE,ACTIVATE new marker with attributes",
 			handler: func(ctx sdk.Context) error {
-				msg := types.NewMsgAddFinalizeActivateMarkerRequest(rdenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{"attributes.one.com", "attributes.two.com"}, []types.AccessGrant{*types.NewAccessGrant(s.owner1Addr, []types.Access{types.Access_Mint, types.Access_Admin})}, 0, 0)
+				msg := types.NewMsgAddFinalizeActivateMarkerRequest(rdenom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_RestrictedCoin, true, true, false, []string{"attributes.one.com", "attributes.two.com"}, []types.AccessGrant{*types.NewAccessGrant(s.owner1Addr, []types.Access{types.Access_Mint, types.Access_Admin})}, 0, sdkmath.ZeroInt())
 				_, err := s.msgServer.AddFinalizeActivateMarker(s.ctx, msg)
 				return err
 			},
@@ -1262,7 +1262,7 @@ func (s *MsgServerTestSuite) TestMsgAddFinalizeActivateMarkerRequest() {
 		{
 			name: "should fail to ADD,FINALIZE,ACTIVATE new marker, validate basic failure",
 			handler: func(ctx sdk.Context) error {
-				msg := types.NewMsgAddFinalizeActivateMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, nil, 0, 0)
+				msg := types.NewMsgAddFinalizeActivateMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, nil, 0, sdkmath.ZeroInt())
 				_, err := s.msgServer.AddFinalizeActivateMarker(s.ctx, msg)
 				return err
 			},
@@ -1271,7 +1271,7 @@ func (s *MsgServerTestSuite) TestMsgAddFinalizeActivateMarkerRequest() {
 		{
 			name: "should fail to ADD,FINALIZE,ACTIVATE new marker, marker already exists",
 			handler: func(ctx sdk.Context) error {
-				msg := types.NewMsgAddMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+				msg := types.NewMsgAddMarkerRequest(denom, sdkmath.NewInt(100), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 				_, err := s.msgServer.AddMarker(s.ctx, msg)
 				return err
 			},
@@ -1280,7 +1280,7 @@ func (s *MsgServerTestSuite) TestMsgAddFinalizeActivateMarkerRequest() {
 		{
 			name: "should successfully add marker with dash and period",
 			handler: func(ctx sdk.Context) error {
-				msg := types.NewMsgAddMarkerRequest(denomWithDashPeriod, sdkmath.NewInt(1000), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, 0)
+				msg := types.NewMsgAddMarkerRequest(denomWithDashPeriod, sdkmath.NewInt(1000), s.owner1Addr, s.owner1Addr, types.MarkerType_Coin, true, true, false, []string{}, 0, sdkmath.ZeroInt())
 				_, err := s.msgServer.AddMarker(s.ctx, msg)
 				return err
 			},
@@ -1354,7 +1354,7 @@ func (s *MsgServerTestSuite) TestMsgSetAccountDataRequest() {
 			{Address: s.owner2, Permissions: []types.Access{types.Access_Deposit}},
 		},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	)
 	_, err := s.msgServer.AddFinalizeActivateMarker(s.ctx, msg)
 	s.Assert().NoError(err, "should successfully add/finalize/active unrestricted marker")
@@ -1372,7 +1372,7 @@ func (s *MsgServerTestSuite) TestMsgSetAccountDataRequest() {
 			{Address: s.owner2, Permissions: []types.Access{types.Access_Deposit}},
 		},
 		0,
-		0,
+		sdkmath.ZeroInt(),
 	)
 	_, err = s.msgServer.AddFinalizeActivateMarker(s.ctx, msg)
 	s.Assert().NoError(err, "should successfully add/finalize/active restricted marker")

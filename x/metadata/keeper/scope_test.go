@@ -3322,8 +3322,9 @@ func (s *ScopeKeeperTestSuite) TestGetNetAssetValue() {
 	scopeIDOK := types.ScopeMetadataAddress(toUUID("okayokayokayokay"))
 	priceDenomOK := "aokay"
 	okNAV := types.NetAssetValue{
-		Price:  sdk.NewInt64Coin(priceDenomOK, 987_123_654),
-		Volume: 1,
+		Price:     sdk.NewInt64Coin(priceDenomOK, 987_123_654),
+		Volume:    1,
+		VolumeInt: sdkmath.OneInt(),
 	}
 
 	setupStore := func() {
@@ -3502,7 +3503,7 @@ func (s *ScopeKeeperTestSuite) TestSetNetAssetValue() {
 			var expErrs []string
 			var expEvents sdk.Events
 			if len(tc.expErr) == 0 {
-				event := types.NewEventSetNetAssetValue(scopeID, tc.netAssetValue.Price, 1, "test")
+				event := types.NewEventSetNetAssetValue(scopeID, tc.netAssetValue.Price, sdkmath.NewInt(1), "test")
 				eventU, err := sdk.TypedEventToEvent(event)
 				s.Require().NoError(err, "TypedEventToEvent(NewEventSetNetAssetValue)")
 				expEvents = sdk.Events{eventU}
@@ -3540,7 +3541,8 @@ func (s *ScopeKeeperTestSuite) TestRemoveNetAssetValues() {
 					Denom:  "usd",
 					Amount: sdkmath.NewInt(1000),
 				},
-				Volume: 1,
+				Volume:    1,
+				VolumeInt: sdkmath.OneInt(),
 			},
 			expErr: "",
 		},

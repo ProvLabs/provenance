@@ -1640,7 +1640,7 @@ func AddNewMarkerFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(FlagAllowForceTransfer, false, "Indicates that force transfer is allowed")
 	cmd.Flags().StringSlice(FlagRequiredAttributes, []string{}, "comma delimited list of required attributes needed for a restricted marker to have send authority")
 	cmd.Flags().Uint64(FlagUsdMills, 0, "Indicates the net asset value of marker in usd mills, i.e. 1234 = $1.234")
-	cmd.Flags().Uint64(FlagVolume, 0, "Indicates the volume of the net asset value")
+	cmd.Flags().String(FlagVolume, "0", "Indicates the volume of the net asset value")
 }
 
 // NewMarkerFlagValues represents the values provided in the flags added by AddNewMarkerFlags.
@@ -1651,7 +1651,7 @@ type NewMarkerFlagValues struct {
 	AllowForceTransfer bool
 	RequiredAttributes []string
 	UsdMills           uint64
-	Volume             uint64
+	Volume             sdkmath.Int
 }
 
 // ParseNewMarkerFlags reads the flags added by AddNewMarkerFlags.
@@ -1696,12 +1696,17 @@ func ParseNewMarkerFlags(cmd *cobra.Command) (*NewMarkerFlagValues, error) {
 		return nil, fmt.Errorf("incorrect value for %s flag.  Accepted: 0 or greater value Error: %w", FlagUsdMills, err)
 	}
 
-	rv.Volume, err = cmd.Flags().GetUint64(FlagVolume)
+	volumeStr, err := cmd.Flags().GetString(FlagVolume)
 	if err != nil {
 		return nil, fmt.Errorf("incorrect value for %s flag.  Accepted: 0 or greater value Error: %w", FlagVolume, err)
 	}
+	volume, ok := sdkmath.NewIntFromString(volumeStr)
+	if !ok || volume.IsNegative() {
+		return nil, fmt.Errorf("incorrect value for %s flag.  Accepted: 0 or greater value: %s", FlagVolume, volumeStr)
+	}
+	rv.Volume = volume
 
-	if rv.UsdMills > 0 && rv.Volume == 0 {
+	if rv.UsdMills > 0 && !rv.Volume.IsPositive() {
 		return nil, fmt.Errorf("incorrect value for %s flag.  Must be positive number if %s flag has been set to positive value", FlagVolume, FlagUsdMills)
 	}
 

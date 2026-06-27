@@ -241,8 +241,11 @@ message NetAssetValue {
   cosmos.base.v1beta1.Coin price = 1 [(gogoproto.nullable) = false];
   // updated_block_height is the block height of last update
   uint64 updated_block_height = 2;
-  // volume is the number of scope instances that were purchased for the price
-  // Typically this will be null (equivalent to one) or one.  The only reason this would be more than
-  // one is for cases where the precision of the price denom is insufficient to represent the actual price
-  uint64 volume = 3;
+  // Deprecated: Prefer to use `volume_int` instead. volume is the number of scope instances that were purchased for
+  // the price. It cannot represent volumes larger than the max uint64; use volume_int for those.
+  uint64 volume = 3 [deprecated = true];
+  // volume_int is the number of scope instances that were purchased for the price. It is the 256-bit replacement for
+  // the deprecated volume field and is the authoritative value when set. Typically this is one; the only reason it
+  // would be more than one is when the precision of the price denom is insufficient to represent the actual price.
+  string volume_int = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }

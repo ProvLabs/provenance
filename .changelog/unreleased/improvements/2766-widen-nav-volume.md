@@ -1,0 +1,1 @@
+* Add a 256-bit `volume_int` field to marker and metadata `NetAssetValue` so net-asset values can scale with high-supply markers; the deprecated uint64 `volume` field is still populated when the value fits [#2766](https://github.com/provenance-io/provenance/issues/2766).

@@ -220,9 +220,9 @@ func NewMsgAddMarkerRequest(
 	allowForcedTransfer bool,
 	requiredAttributes []string,
 	usdMills uint64,
-	volume uint64,
+	volume sdkmath.Int,
 ) *MsgAddMarkerRequest {
-	return &MsgAddMarkerRequest{
+	msg := &MsgAddMarkerRequest{
 		Amount:                 sdk.NewCoin(denom, totalSupply),
 		Manager:                manager.String(),
 		FromAddress:            fromAddress.String(),
@@ -233,8 +233,21 @@ func NewMsgAddMarkerRequest(
 		AllowForcedTransfer:    allowForcedTransfer,
 		RequiredAttributes:     requiredAttributes,
 		UsdMills:               usdMills,
-		Volume:                 volume,
+		VolumeInt:              volume,
 	}
+	if !volume.IsNil() && volume.IsUint64() {
+		msg.Volume = volume.Uint64()
+	}
+	return msg
+}
+
+// EffectiveVolume returns the request's net asset value volume as a math.Int,
+// preferring volume_int and falling back to the deprecated uint64 volume.
+func (msg MsgAddMarkerRequest) EffectiveVolume() sdkmath.Int {
+	if !msg.VolumeInt.IsNil() && !msg.VolumeInt.IsZero() {
+		return msg.VolumeInt
+	}
+	return sdkmath.NewIntFromUint64(msg.Volume)
 }
 
 func (msg MsgAddMarkerRequest) ValidateBasic() error {
@@ -440,9 +453,9 @@ func NewMsgAddFinalizeActivateMarkerRequest(
 	requiredAttributes []string,
 	accessGrants []AccessGrant,
 	usdMills uint64,
-	netAssetVolume uint64,
+	netAssetVolume sdkmath.Int,
 ) *MsgAddFinalizeActivateMarkerRequest {
-	return &MsgAddFinalizeActivateMarkerRequest{
+	msg := &MsgAddFinalizeActivateMarkerRequest{
 		Amount:                 sdk.NewCoin(denom, totalSupply),
 		Manager:                manager.String(),
 		FromAddress:            fromAddress.String(),
@@ -453,8 +466,21 @@ func NewMsgAddFinalizeActivateMarkerRequest(
 		AllowForcedTransfer:    allowForcedTransfer,
 		RequiredAttributes:     requiredAttributes,
 		UsdMills:               usdMills,
-		Volume:                 netAssetVolume,
+		VolumeInt:              netAssetVolume,
 	}
+	if !netAssetVolume.IsNil() && netAssetVolume.IsUint64() {
+		msg.Volume = netAssetVolume.Uint64()
+	}
+	return msg
+}
+
+// EffectiveVolume returns the request's net asset value volume as a math.Int,
+// preferring volume_int and falling back to the deprecated uint64 volume.
+func (msg MsgAddFinalizeActivateMarkerRequest) EffectiveVolume() sdkmath.Int {
+	if !msg.VolumeInt.IsNil() && !msg.VolumeInt.IsZero() {
+		return msg.VolumeInt
+	}
+	return sdkmath.NewIntFromUint64(msg.Volume)
 }
 
 func (msg MsgAddFinalizeActivateMarkerRequest) ValidateBasic() error {

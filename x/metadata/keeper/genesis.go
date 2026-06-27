@@ -69,12 +69,9 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) {
 			if err != nil {
 				panic(err)
 			}
-			// Extra guard here in case volume is null or invalid
-			volume := nav.GetVolume()
-			if volume < 1 {
-				volume = 1
-			}
-			err = k.SetNetAssetValue(ctx, address, types.NewNetAssetValue(nav.Price, volume), types.ModuleName)
+			// SetNetAssetValue normalizes the volume (reconciling volume_int with
+			// the deprecated uint64 volume and defaulting an absent/zero volume to one).
+			err = k.SetNetAssetValue(ctx, address, types.NewNetAssetValueFromInt(nav.Price, nav.EffectiveVolume()), types.ModuleName)
 			if err != nil {
 				panic(err)
 			}

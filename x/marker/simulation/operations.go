@@ -115,7 +115,7 @@ func SimulateMsgAddMarker(k keeper.Keeper, args *WeightedOpsArgs) simtypes.Opera
 			r.Intn(2) > 0,     // allow forced transfer
 			[]string{},
 			0,
-			0,
+			sdkmath.ZeroInt(),
 		)
 
 		return Dispatch(r, app, ctx, args.SimState, args.AK, args.BK, simAccount, chainID, msg, nil)
@@ -214,7 +214,7 @@ func SimulateMsgAddFinalizeActivateMarker(k keeper.Keeper, args *WeightedOpsArgs
 			[]string{},
 			grants,
 			0,
-			0,
+			sdkmath.ZeroInt(),
 		)
 
 		if msg.MarkerType != types.MarkerType_RestrictedCoin {

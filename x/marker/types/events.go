@@ -175,11 +175,11 @@ func NewEventMarkerSetDenomMetadata(metadata banktypes.Metadata, administrator s
 }
 
 // NewEventSetNetAssetValue returns a new instance of EventSetNetAssetValue
-func NewEventSetNetAssetValue(denom string, price sdk.Coin, volume uint64, source string) *EventSetNetAssetValue {
+func NewEventSetNetAssetValue(denom string, price sdk.Coin, volume sdkmath.Int, source string) *EventSetNetAssetValue {
 	return &EventSetNetAssetValue{
 		Denom:  denom,
 		Price:  price.String(),
-		Volume: strconv.FormatUint(volume, 10),
+		Volume: volume.String(),
 		Source: source,
 	}
 }

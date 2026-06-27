@@ -861,11 +861,10 @@ func (k Keeper) GetNetAssetValue(ctx sdk.Context, metadataDenom, priceDenom stri
 	if err != nil {
 		return nil, fmt.Errorf("could not read nav for %q with price denom %q: %w", scopeID, priceDenom, err)
 	}
-	// The Volume will be zero for NAVs written before that field was added. So if it's still 0,
-	// we switch it to 1 since that's what it was assumed to be before the Volume field was added.
-	if scopeNAV.Volume < 1 {
-		scopeNAV.Volume = 1
-	}
+	// Reconcile the deprecated uint64 volume with volume_int and apply the
+	// long-standing default that an absent or zero volume means one (the assumed
+	// value for NAVs written before the volume field existed).
+	scopeNAV.Normalize()
 
 	return &scopeNAV, nil
 }
@@ -877,12 +876,11 @@ func (k Keeper) SetNetAssetValue(ctx sdk.Context, scopeID types.MetadataAddress,
 		return err
 	}
 
-	// Since this field was added we need to ensure the default value matches the previous behavior of always presuming one is used.
-	if netAssetValue.Volume < 1 {
-		netAssetValue.Volume = 1
-	}
+	// Reconcile the deprecated uint64 volume with volume_int and apply the
+	// long-standing default that an absent or zero volume means one.
+	netAssetValue.Normalize()
 
-	setNetAssetValueEvent := types.NewEventSetNetAssetValue(scopeID, netAssetValue.Price, netAssetValue.Volume, source)
+	setNetAssetValueEvent := types.NewEventSetNetAssetValue(scopeID, netAssetValue.Price, netAssetValue.EffectiveVolume(), source)
 	if err := ctx.EventManager().EmitTypedEvent(setNetAssetValueEvent); err != nil {
 		return err
 	}
@@ -935,11 +933,12 @@ func (k Keeper) RemoveNetAssetValues(ctx sdk.Context, scopeID types.MetadataAddr
 // SetNetAssetValueWithBlockHeight adds/updates a net asset value to scope with a specific block height
 func (k Keeper) SetNetAssetValueWithBlockHeight(ctx sdk.Context, scopeID types.MetadataAddress, netAssetValue types.NetAssetValue, source string, blockHeight uint64) error {
 	netAssetValue.UpdatedBlockHeight = blockHeight
+	netAssetValue.Normalize()
 	if err := netAssetValue.Validate(); err != nil {
 		return err
 	}
 
-	setNetAssetValueEvent := types.NewEventSetNetAssetValue(scopeID, netAssetValue.Price, netAssetValue.Volume, source)
+	setNetAssetValueEvent := types.NewEventSetNetAssetValue(scopeID, netAssetValue.Price, netAssetValue.EffectiveVolume(), source)
 	if err := ctx.EventManager().EmitTypedEvent(setNetAssetValueEvent); err != nil {
 		return err
 	}

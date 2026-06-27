@@ -2203,16 +2203,16 @@ func (s *TestSuite) TestKeeper_SettleCommitments() {
 					{
 						ScopeID: scopeID1,
 						NAVs: []metadatatypes.NetAssetValue{
-							{Price: s.coin("71cherry"), Volume: 1},
-							{Price: s.coin("400nhash"), Volume: 1},
+							{Price: s.coin("71cherry"), Volume: 1, VolumeInt: sdkmath.NewInt(1)},
+							{Price: s.coin("400nhash"), Volume: 1, VolumeInt: sdkmath.NewInt(1)},
 						},
 						Source: navSource(4),
 					},
 					{
 						ScopeID: scopeID2,
 						NAVs: []metadatatypes.NetAssetValue{
-							{Price: s.coin("5cherry"), Volume: 1},
-							{Price: s.coin("6600nhash"), Volume: 1},
+							{Price: s.coin("5cherry"), Volume: 1, VolumeInt: sdkmath.NewInt(1)},
+							{Price: s.coin("6600nhash"), Volume: 1, VolumeInt: sdkmath.NewInt(1)},
 						},
 						Source: navSource(4),
 					},
@@ -2224,16 +2224,16 @@ func (s *TestSuite) TestKeeper_SettleCommitments() {
 					{
 						marker: appleMarker,
 						netAssetValues: []markertypes.NetAssetValue{
-							markertypes.NewNetAssetValue(s.coin("33cherry"), 10),
-							markertypes.NewNetAssetValue(s.coin("700nhash"), 11),
+							markertypes.NewNetAssetValueFromInt(s.coin("33cherry"), sdkmath.NewInt(10)),
+							markertypes.NewNetAssetValueFromInt(s.coin("700nhash"), sdkmath.NewInt(11)),
 						},
 						source: navSource(4),
 					},
 					{
 						marker: bananaMarker,
 						netAssetValues: []markertypes.NetAssetValue{
-							markertypes.NewNetAssetValue(s.coin("62cherry"), 12),
-							markertypes.NewNetAssetValue(s.coin("1500nhash"), 13),
+							markertypes.NewNetAssetValueFromInt(s.coin("62cherry"), sdkmath.NewInt(12)),
+							markertypes.NewNetAssetValueFromInt(s.coin("1500nhash"), sdkmath.NewInt(13)),
 						},
 						source: navSource(4),
 					},

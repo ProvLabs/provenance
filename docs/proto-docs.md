@@ -9991,8 +9991,9 @@ MsgAddFinalizeActivateMarkerRequest defines the Msg/AddFinalizeActivateMarker re
 | `allow_forced_transfer` | [bool](#bool) |  |  |
 | `required_attributes` | [string](#string) | repeated |  |
 | `usd_cents` | [uint64](#uint64) |  | **Deprecated.**  |
-| `volume` | [uint64](#uint64) |  |  |
+| `volume` | [uint64](#uint64) |  | **Deprecated.** Deprecated: Prefer to use `volume_int` instead. It cannot represent volumes larger than the max uint64. |
 | `usd_mills` | [uint64](#uint64) |  |  |
+| `volume_int` | [string](#string) |  | volume_int is the 256-bit replacement for the deprecated volume field; it is the authoritative value when set. |
 
 
 
@@ -10029,8 +10030,9 @@ If being provided as a governance proposal, set the from_address to the gov modu
 | `allow_forced_transfer` | [bool](#bool) |  |  |
 | `required_attributes` | [string](#string) | repeated |  |
 | `usd_cents` | [uint64](#uint64) |  | **Deprecated.**  |
-| `volume` | [uint64](#uint64) |  |  |
+| `volume` | [uint64](#uint64) |  | **Deprecated.** Deprecated: Prefer to use `volume_int` instead. It cannot represent volumes larger than the max uint64. |
 | `usd_mills` | [uint64](#uint64) |  |  |
+| `volume_int` | [string](#string) |  | volume_int is the 256-bit replacement for the deprecated volume field; it is the authoritative value when set. |
 
 
 
@@ -11141,8 +11143,9 @@ NetAssetValue defines a marker's net asset value
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `price` | [cosmos.base.v1beta1.Coin](#cosmos-base-v1beta1-Coin) |  | price is the complete value of the asset's volume |
-| `volume` | [uint64](#uint64) |  | volume is the number of tokens of the marker that were purchased for the price |
+| `volume` | [uint64](#uint64) |  | **Deprecated.** Deprecated: Prefer to use `volume_int` instead. volume is the number of tokens of the marker that were purchased for the price. It cannot represent volumes larger than the max uint64; use volume_int for those. |
 | `updated_block_height` | [uint64](#uint64) |  | updated_block_height is the block height of last update |
+| `volume_int` | [string](#string) |  | volume_int is the number of tokens of the marker that were purchased for the price. It is the 256-bit replacement for the deprecated volume field and is the authoritative value when set. |
 
 
 
@@ -13768,7 +13771,8 @@ NetAssetValue defines a scope's net asset value
 | ----- | ---- | ----- | ----------- |
 | `price` | [cosmos.base.v1beta1.Coin](#cosmos-base-v1beta1-Coin) |  | price is the complete value of the asset's volume |
 | `updated_block_height` | [uint64](#uint64) |  | updated_block_height is the block height of last update |
-| `volume` | [uint64](#uint64) |  | volume is the number of scope instances that were purchased for the price Typically this will be null (equivalent to one) or one. The only reason this would be more than one is for cases where the precision of the price denom is insufficient to represent the actual price |
+| `volume` | [uint64](#uint64) |  | **Deprecated.** Deprecated: Prefer to use `volume_int` instead. volume is the number of scope instances that were purchased for the price. It cannot represent volumes larger than the max uint64; use volume_int for those. |
+| `volume_int` | [string](#string) |  | volume_int is the number of scope instances that were purchased for the price. It is the 256-bit replacement for the deprecated volume field and is the authoritative value when set. Typically this is one; the only reason it would be more than one is when the precision of the price denom is insufficient to represent the actual price. |
 
 
 

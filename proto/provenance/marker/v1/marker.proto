@@ -94,10 +94,14 @@ enum MarkerStatus {
 message NetAssetValue {
   // price is the complete value of the asset's volume
   cosmos.base.v1beta1.Coin price = 1 [(gogoproto.nullable) = false];
-  // volume is the number of tokens of the marker that were purchased for the price
-  uint64 volume = 2;
+  // Deprecated: Prefer to use `volume_int` instead. volume is the number of tokens of the marker that were purchased
+  // for the price. It cannot represent volumes larger than the max uint64; use volume_int for those.
+  uint64 volume = 2 [deprecated = true];
   // updated_block_height is the block height of last update
   uint64 updated_block_height = 3;
+  // volume_int is the number of tokens of the marker that were purchased for the price. It is the 256-bit replacement
+  // for the deprecated volume field and is the authoritative value when set.
+  string volume_int = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // EventMarkerAdd event emitted when marker is added
