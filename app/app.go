@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -226,6 +227,21 @@ var (
 // This is only used for parsing in the app, x/wasm expects WasmConfig
 type WasmWrapper struct {
 	Wasm wasmtypes.NodeConfig `mapstructure:"wasm"`
+}
+
+// vaultExchangeKeeper adapts the exchange keeper to the x/vault ExchangeKeeper
+// interface. The embedded Keeper supplies GetPayment, AcceptPayment, and
+// RejectPayment; GetPaymentsWithTarget is a query-server method, so it is added
+// here by delegating to the exchange query server. This keeps x/exchange
+// untouched.
+type vaultExchangeKeeper struct {
+	exchangekeeper.Keeper
+}
+
+// GetPaymentsWithTarget delegates to the exchange query server so the vault module
+// can list pending payments targeting a vault.
+func (k vaultExchangeKeeper) GetPaymentsWithTarget(goCtx context.Context, req *exchange.QueryGetPaymentsWithTargetRequest) (*exchange.QueryGetPaymentsWithTargetResponse, error) {
+	return exchangekeeper.NewQueryServer(k.Keeper).GetPaymentsWithTarget(goCtx, req)
 }
 
 // SdkCoinDenomRegex returns a new sdk base denom regex string
@@ -615,6 +631,7 @@ func New(
 		app.BankKeeper,
 		app.NameKeeper,
 		app.AttributeKeeper,
+		vaultExchangeKeeper{app.ExchangeKeeper},
 	)
 
 	app.TriggerKeeper = triggerkeeper.NewKeeper(appCodec, keys[triggertypes.StoreKey], app.MsgServiceRouter())
